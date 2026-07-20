@@ -388,7 +388,7 @@ impl GeminiConnector {
 
 #[async_trait]
 impl Connector for GeminiConnector {
-    async fn complete(&self, req: &ChatCompletionRequest) -> Result<ConnectorResult, ConnectorError> {
+    async fn complete(&self, _req: &ChatCompletionRequest) -> Result<ConnectorResult, ConnectorError> {
         // TODO: implement Gemini API call
         // See the comment block above for the mapping you need.
         Err(ConnectorError::NotImplemented(

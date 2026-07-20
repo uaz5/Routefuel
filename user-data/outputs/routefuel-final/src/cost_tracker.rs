@@ -12,7 +12,6 @@ use sqlx::{Error as SqlxError, Row};
 use std::sync::Arc;
 use thiserror::Error;
 use tracing::{debug, error, instrument, warn};
-use uuid::Uuid;
 
 #[derive(Error, Debug)]
 pub enum CostTrackerError {
