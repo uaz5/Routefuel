@@ -37,9 +37,8 @@ pub fn count_tokens(text: &str) -> Result<u32, TokenError> {
     let tok = TOKENIZER.lock()
         .map_err(|e| TokenError::LockPoisoned(e.to_string()))?;
 
-    let tokens = tok.encode_ordinary(text)
-        .map_err(|e| TokenError::EncodeFailed(e.to_string()))?;
-
+   let tokens = tok.encode_ordinary(text);
+   
     let n = tokens.len() as u32;
     debug!(text_len = text.len(), token_count = n, "Counted tokens");
     Ok(n)
@@ -119,4 +118,10 @@ mod tests {
         assert_eq!(estimate_output_tokens(None, "claude-opus-4-7"), 2048);
         assert_eq!(estimate_output_tokens(None, "gemini-3-flash"),  512);
     }
+}
+#[derive(Debug, Clone, Default)]
+pub struct TokenCostBreakdown {
+    pub prompt_tokens: u32,
+    pub completion_tokens: u32,
+    pub total_tokens: u32,
 }
