@@ -38,7 +38,7 @@ impl UserTier {
 }
 
 pub struct RateLimiter {
-    limiters: RwLock<HashMap<String, GovernorLimiter>>,
+    limiters: RwLock<HashMap<String, governor::DefaultDirectRateLimiter>>,
 }
 
 impl RateLimiter {
