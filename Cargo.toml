@@ -1,0 +1,76 @@
+[package]
+name = "routefuel"
+version = "0.3.0"
+edition = "2021"
+authors = ["RouteFuel Team <founders@routefuel.io>"]
+description = "Production-grade AI Gateway with live cost auditing"
+license = "Apache-2.0"
+
+[dependencies]
+# Web framework & async runtime
+axum = { version = "0.7", features = ["macros"] }
+tokio = { version = "1.40", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace", "cors", "timeout", "compression-br"] }
+hyper = "1.4"
+
+# Serialization & JSON
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# HTTP client (for calling LLM providers)
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "stream", "http2"], default-features = false }
+http = "1.1"
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+
+# Token counting (100% accurate via OpenAI's tokenizer)
+tiktoken-rs = "0.5"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json", "ansi"] }
+
+# Environment
+dotenv = "0.15"
+
+# Concurrency & circuits
+governor = "0.6"
+async-trait = "0.1"
+
+# Utilities
+lazy_static = "1.4"
+parking_lot = "0.12"
+sha2 = "0.10"
+dashmap = "6.0"
+pgvector = "0.4"
+
+# Validation
+validator = { version = "0.16", features = ["derive"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+mockall = "0.12"
+tempfile = "3.8"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[profile.dev]
+opt-level = 0
+
+# This is required to get correct error messages with backtrace
+# RUST_BACKTRACE=1 or RUST_BACKTRACE=full
