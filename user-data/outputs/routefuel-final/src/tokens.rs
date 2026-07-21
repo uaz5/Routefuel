@@ -127,3 +127,9 @@ pub struct TokenCostBreakdown {
     pub cost_input_cents: f64,
     pub cost_output_cents: f64,
     pub total_cost_cents: f64,
+    #[test]
+    fn estimate_defaults_by_model() {
+        assert_eq!(estimate_output_tokens(None, "claude-opus-4-7"), 2048);
+        assert_eq!(estimate_output_tokens(None, "gemini-3-flash"),  512);
+    }
+}
