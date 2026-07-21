@@ -44,9 +44,9 @@ CREATE INDEX IF NOT EXISTS idx_rl_client        ON request_logs (client_id);
 CREATE INDEX IF NOT EXISTS idx_rl_created_at    ON request_logs (created_at);
 CREATE INDEX IF NOT EXISTS idx_rl_status        ON request_logs (status);
 
--- Composite index for daily report queries
+--- Composite index for daily report queries
 CREATE INDEX IF NOT EXISTS idx_rl_date_provider
-    ON request_logs (DATE(created_at), provider)
+    ON request_logs (created_at, provider)
     WHERE status = 'success';
 
 COMMENT ON TABLE  request_logs                IS 'Immutable audit trail of every request routed through RouteFuel';
