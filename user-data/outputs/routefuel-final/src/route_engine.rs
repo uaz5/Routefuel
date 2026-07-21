@@ -349,6 +349,17 @@ impl RouteEngine {
             .cloned()
             .ok_or_else(|| anyhow!("Unknown model id: {}", api_id))
     }
+    
+pub fn select_provider(&self, model_name: &str) -> Result<Provider> {
+        match self.find(model_name) {
+            Ok(m) => Ok(m.provider),
+            Err(_) => {
+                // Fallback to balanced routing if exact model string isn't found
+                let decision = self.select(1000, 1024, RoutingPriority::Balanced)?;
+                Ok(decision.model.provider)
+            }
+        }
+    }
 
     pub fn get_pricing(&self, api_id: &str) -> Result<(f64, f64)> {
         let m = self.find(api_id)?;

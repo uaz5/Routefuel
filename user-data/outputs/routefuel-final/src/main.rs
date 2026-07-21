@@ -196,10 +196,10 @@ async fn chat_completions_handler(
             );
 
             match e {
-                connectors::ConnectorError::CircuitBreakerOpen => ApiError::CircuitOpen,
+                connectors::ConnectorError::CircuitOpen => ApiError::CircuitOpen,
                 connectors::ConnectorError::RateLimited => ApiError::RateLimited,
-                connectors::ConnectorError::ProviderServerError { .. } => {
-                    ApiError::ProviderError("Provider returned an error".to_string())
+                connectors::ConnectorError::ServerError { status } => {
+                    ApiError::ProviderError(format!("Provider returned error status {}", status))
                 }
                 _ => ApiError::ProviderError(e.to_string()),
             }
@@ -234,7 +234,7 @@ async fn chat_completions_handler(
 
     let (cost_per_1m_input, cost_per_1m_output) = state
         .route_engine
-        .get_pricing(selected_provider, &request.model)
+        .get_pricing(&request.model) // <-- No comma, just the model!
         .map_err(|e| {
             error!("Pricing lookup failed: {}", e);
             ApiError::InternalError("Pricing lookup failed".to_string())
