@@ -118,11 +118,6 @@ impl CostTracker {
     }
 
     /// Record a request asynchronously to the database
-    ///
-    /// This spawns a background task via tokio::spawn so it doesn't block
-    /// the response. If the write fails, it logs an error but doesn't fail the request.
-    ///
-    /// This ensures zero latency impact on the response path.
     #[instrument(skip(self), fields(request_id = %request_id))]
     pub fn record_request(
         &self,
@@ -137,10 +132,15 @@ impl CostTracker {
         user_tier: Option<String>,
         priority: Option<String>,
     ) {
+        // Log BEFORE variables get moved into tokio::spawn
+        debug!(
+            request_id = %request_id,
+            cost_cents = token_cost.total_cost_cents,
+            "Queued request log for database write"
+        );
+
         let pool = Arc::clone(&self.pool);
         let provider_str = provider.to_string();
-
-        // Clone data for the async task
         let token_cost = token_cost.clone();
 
         // Spawn async task - fire and forget
@@ -167,12 +167,6 @@ impl CostTracker {
                 );
             }
         });
-
-        debug!(
-            request_id = %request_id,
-            cost_cents = token_cost.total_cost_cents,
-            "Queued request log for database write"
-        );
     }
 
     /// Record a failed request asynchronously
@@ -187,6 +181,13 @@ impl CostTracker {
         routing_decision_ms: u64,
         client_id: Option<String>,
     ) {
+        // Log BEFORE variables get moved into tokio::spawn
+        debug!(
+            request_id = %request_id,
+            error = %error_message,
+            "Queued error log for database write"
+        );
+
         let pool = Arc::clone(&self.pool);
         let provider_str = provider.to_string();
 
@@ -221,12 +222,6 @@ impl CostTracker {
                 );
             }
         });
-
-        debug!(
-            request_id = %request_id,
-            error = %error_message,
-            "Queued error log for database write"
-        );
     }
 
     /// Internal: Write request log to database
