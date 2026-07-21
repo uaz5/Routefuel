@@ -37,8 +37,8 @@ pub fn count_tokens(text: &str) -> Result<u32, TokenError> {
     let tok = TOKENIZER.lock()
         .map_err(|e| TokenError::LockPoisoned(e.to_string()))?;
 
-   let tokens = tok.encode_ordinary(text);
-   
+    let tokens = tok.encode_ordinary(text);
+    
     let n = tokens.len() as u32;
     debug!(text_len = text.len(), token_count = n, "Counted tokens");
     Ok(n)
@@ -47,7 +47,7 @@ pub fn count_tokens(text: &str) -> Result<u32, TokenError> {
 /// Count tokens for a chat message including role + formatting overhead.
 /// OpenAI adds ~4 tokens per message for <|im_start|>role\ncontent<|im_end|>\n
 pub fn count_message_tokens(role: &str, content: &str) -> Result<u32, TokenError> {
-    let role_tokens    = count_tokens(role)?;
+    let role_tokens     = count_tokens(role)?;
     let content_tokens = count_tokens(content)?;
     Ok(role_tokens + content_tokens + 4)   // 4 = formatting overhead
 }
@@ -96,6 +96,16 @@ pub fn verify_output_tokens(
     Ok((counted, matches))
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct TokenCostBreakdown {
+    pub input_tokens: u32,
+    pub output_tokens: u32,
+    pub total_tokens: u32,
+    pub cost_input_cents: f64,
+    pub cost_output_cents: f64,
+    pub total_cost_cents: f64,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -115,20 +125,6 @@ mod tests {
     }
 
     #[test] fn estimate_defaults_by_model() {
-        assert_eq!(estimate_output_tokens(None, "claude-opus-4-7"), 2048);
-        assert_eq!(estimate_output_tokens(None, "gemini-3-flash"),  512);
-    }
-}
-#[derive(Debug, Clone, Default)]
-pub struct TokenCostBreakdown {
-    pub input_tokens: u32,
-    pub output_tokens: u32,
-    pub total_tokens: u32,
-    pub cost_input_cents: f64,
-    pub cost_output_cents: f64,
-    pub total_cost_cents: f64,
-    #[test]
-    fn estimate_defaults_by_model() {
         assert_eq!(estimate_output_tokens(None, "claude-opus-4-7"), 2048);
         assert_eq!(estimate_output_tokens(None, "gemini-3-flash"),  512);
     }
