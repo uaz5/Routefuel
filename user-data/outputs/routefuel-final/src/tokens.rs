@@ -121,7 +121,9 @@ mod tests {
 }
 #[derive(Debug, Clone, Default)]
 pub struct TokenCostBreakdown {
-    pub prompt_tokens: u32,
-    pub completion_tokens: u32,
+    pub input_tokens: u32,
+    pub output_tokens: u32,
     pub total_tokens: u32,
-}
+    pub cost_input_cents: f64,
+    pub cost_output_cents: f64,
+    pub total_cost_cents: f64,
