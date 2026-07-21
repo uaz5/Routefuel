@@ -403,18 +403,6 @@ impl CostTracker {
     }
 }
 
-// Required for cloning TokenCostBreakdown in spawn
-impl Clone for TokenCostBreakdown {
-    fn clone(&self) -> Self {
-        Self {
-            input_tokens: self.input_tokens,
-            output_tokens: self.output_tokens,
-            cost_input_cents: self.cost_input_cents,
-            cost_output_cents: self.cost_output_cents,
-            total_cost_cents: self.total_cost_cents,
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {
