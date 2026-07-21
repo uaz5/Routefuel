@@ -11,7 +11,7 @@ mod route_engine;
 mod tokens;
 
 use axum::{
-    extract::{State, DefaultBodyLimit},
+    extract::{DefaultBodyLimit, State},
     http::StatusCode,
     response::{IntoResponse, Response},
     routing::post,
@@ -26,12 +26,15 @@ use tower_http::{
     timeout::TimeoutLayer,
     trace::TraceLayer,
 };
-use tracing::{info, debug, error, instrument};
+use tracing::{debug, error, info, instrument};
 use uuid::Uuid;
 
-use crate::connectors::{ChatCompletionRequest, ChatCompletionResponse, Provider, ConnectorManager, OpenAIConnector, AnthropicConnector, Connector};
-use crate::cost_tracker::CostTracker;
 use crate::circuit_breaker::CircuitBreaker;
+use crate::connectors::{
+    AnthropicConnector, ChatCompletionRequest, ChatCompletionResponse, Connector,
+    ConnectorManager, OpenAIConnector, Provider,
+};
+use crate::cost_tracker::CostTracker;
 use crate::route_engine::RouteEngine;
 use crate::tokens::TokenCostBreakdown;
 
@@ -348,6 +351,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("OPENAI_API_KEY environment variable not set");
     let anthropic_key = std::env::var("ANTHROPIC_API_KEY")
         .expect("ANTHROPIC_API_KEY environment variable not set");
+    let deepseek_key = std::env::var("DEEPSEEK_API_KEY").unwrap_or_default();
+    let gemini_key = std::env::var("GEMINI_API_KEY").unwrap_or_default();
     let database_url = std::env::var("DATABASE_URL")
         .expect("DATABASE_URL environment variable not set");
 
@@ -370,10 +375,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let route_engine = Arc::new(RouteEngine::new());
     let cost_tracker = Arc::new(CostTracker::new(pool));
 
-    // Initialize connectors with circuit breaker
-    let openai = Box::new(OpenAIConnector::new(openai_key, Arc::clone(&circuit_breaker)));
-    let anthropic = Box::new(AnthropicConnector::new(anthropic_key, Arc::clone(&circuit_breaker)));
-    let connector_manager = Arc::new(ConnectorManager::new(openai, anthropic));
+    // Initialize connector manager with key strings & circuit breaker
+    let connector_manager = Arc::new(ConnectorManager::new(
+        openai_key,
+        anthropic_key,
+        deepseek_key,
+        gemini_key,
+        Arc::clone(&circuit_breaker),
+    ));
 
     info!("Components initialized");
 

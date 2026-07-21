@@ -106,6 +106,29 @@ pub struct TokenCostBreakdown {
     pub total_cost_cents: f64,
 }
 
+impl TokenCostBreakdown {
+    pub fn new(
+        input_tokens: u32,
+        output_tokens: u32,
+        cost_per_1m_input: f64,
+        cost_per_1m_output: f64,
+    ) -> Self {
+        let total_tokens = input_tokens + output_tokens;
+        let cost_input_cents = (input_tokens as f64 / 1_000_000.0) * cost_per_1m_input;
+        let cost_output_cents = (output_tokens as f64 / 1_000_000.0) * cost_per_1m_output;
+        let total_cost_cents = cost_input_cents + cost_output_cents;
+
+        Self {
+            input_tokens,
+            output_tokens,
+            total_tokens,
+            cost_input_cents,
+            cost_output_cents,
+            total_cost_cents,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
